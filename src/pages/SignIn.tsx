@@ -1,52 +1,86 @@
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useCallback, useRef, useState} from 'react';
 import {
-  View,
+  Alert,
+  Pressable,
+  StyleSheet,
   Text,
   TextInput,
-  Pressable,
-  Alert,
-  StyleSheet,
+  View,
+  ActivityIndicator,
 } from 'react-native';
-import {RootStackParamList} from '../../App';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import DismissKeyboardView from '../components/DismissKeyboardView';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
+import {RootStackParamList} from '../../AppInner';
+import {useAppDispatch} from '../store';
+import userSlice from '../slices/user';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
 function SignIn({navigation}: SignInScreenProps) {
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const emailRef = useRef<TextInput | null>(null);
   const passwordRef = useRef<TextInput | null>(null);
 
   const onChangeEmail = useCallback(text => {
-    console.log(text);
     setEmail(text.trim());
   }, []);
-
   const onChangePassword = useCallback(text => {
     setPassword(text.trim());
   }, []);
-
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback(async () => {
+    if (loading) {
+      return;
+    }
     if (!email || !email.trim()) {
       return Alert.alert('알림', '이메일을 입력해주세요.');
     }
-
     if (!password || !password.trim()) {
       return Alert.alert('알림', '비밀번호를 입력해주세요.');
     }
+    try {
+      setLoading(true);
+      const response = await axios.post(`${Config.API_URL}/login`, {
+        email,
+        password,
+      });
+      console.log('[login] ', response.data);
+      Alert.alert('알림', '로그인 되었습니다.');
 
-    Alert.alert('알림', '로그인 되었습니다.');
-  }, [email, password]);
+      dispatch(
+        userSlice.actions.setUser({
+          name: response.data.data.name,
+          email: response.data.data.email,
+          accessToken: response.data.data.accessToken, // 유효기간 10분, 5분, 1시간
+        }),
+      );
+
+      await EncryptedStorage.setItem(
+        'refreshToken',
+        response.data.data.refreshToken,
+      );
+    } catch (error) {
+      const errorResponse = (error as AxiosError).response;
+      if (errorResponse) {
+        Alert.alert('알림', (errorResponse.data as any).message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, dispatch, email, password]);
 
   const toSignUp = useCallback(() => {
     navigation.navigate('SignUp');
   }, [navigation]);
 
   const canGoNext = email && password;
-
   return (
-    <View>
+    <DismissKeyboardView>
       <View style={styles.inputWrapper}>
         <Text style={styles.label}>이메일</Text>
         <TextInput
@@ -60,7 +94,6 @@ function SignIn({navigation}: SignInScreenProps) {
           value={email}
           returnKeyType="next"
           clearButtonMode="while-editing"
-          keyboardType="email-address"
           ref={emailRef}
           onSubmitEditing={() => passwordRef.current?.focus()}
           blurOnSubmit={false}
@@ -91,15 +124,19 @@ function SignIn({navigation}: SignInScreenProps) {
               ? StyleSheet.compose(styles.loginButton, styles.loginButtonActive)
               : styles.loginButton
           }
-          disabled={!canGoNext}
+          disabled={!canGoNext || loading}
           onPress={onSubmit}>
-          <Text style={styles.loginButtonText}>로그인</Text>
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.loginButtonText}>로그인</Text>
+          )}
         </Pressable>
         <Pressable onPress={toSignUp}>
           <Text>회원가입하기</Text>
         </Pressable>
       </View>
-    </View>
+    </DismissKeyboardView>
   );
 }
 
@@ -114,6 +151,7 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
     fontSize: 16,
+    marginBottom: 20,
   },
   buttonZone: {
     alignItems: 'center',
