@@ -30,9 +30,11 @@ function SignIn({navigation}: SignInScreenProps) {
   const onChangeEmail = useCallback(text => {
     setEmail(text.trim());
   }, []);
+
   const onChangePassword = useCallback(text => {
     setPassword(text.trim());
   }, []);
+
   const onSubmit = useCallback(async () => {
     if (loading) {
       return;

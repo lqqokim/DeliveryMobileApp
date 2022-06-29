@@ -1,27 +1,38 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-/**
- * action: state 를 바꾸는 행위
- * dispatch: action 을 실제로 실행하는 함수
- * reducer: action 이 실제로 실행되면 state
- */
+interface State {
+  name: string;
+  email: string;
+  accessToken: string;
+  money: number;
+}
 
-const initialState = {
+const initialState: State = {
   name: '',
   email: '',
   accessToken: '',
+  money: 0,
 };
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser(state, action) {
+    setUser(
+      state: State,
+      action: PayloadAction<{email: string; name: string; accessToken: string}>,
+    ) {
       state.email = action.payload.email;
       state.name = action.payload.name;
       state.accessToken = action.payload.accessToken;
     },
+    setAccessToken(state: State, action: PayloadAction<string>) {
+      state.accessToken = action.payload;
+    },
+    setMoney(state: State, action: PayloadAction<number>) {
+      state.money = action.payload;
+    },
   },
-  // 비동기 처리
   extraReducers: builder => {},
 });
 
