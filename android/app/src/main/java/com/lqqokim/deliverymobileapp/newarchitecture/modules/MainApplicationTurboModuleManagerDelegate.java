@@ -1,4 +1,4 @@
-package com.deliverymobileapp.newarchitecture.modules;
+package com.lqqokim.deliverymobileapp.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

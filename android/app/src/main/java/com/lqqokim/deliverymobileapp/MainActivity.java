@@ -1,4 +1,4 @@
-package com.deliverymobileapp;
+package com.lqqokim.deliverymobileapp;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
