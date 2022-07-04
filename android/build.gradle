@@ -8,6 +8,7 @@ buildscript {
         minSdkVersion = 21
         compileSdkVersion = 31
         targetSdkVersion = 31
+        kotlinVersion = "1.5.31"
 
         if (System.properties['os.arch'] == "aarch64") {
             // For M1 Users we need to use the NDK 24 which added support for aarch64
@@ -49,5 +50,9 @@ allprojects {
         }
         google()
         maven { url 'https://www.jitpack.io' }
+        // 네이버 지도 저장소
+        maven {
+            url 'https://naver.jfrog.io/artifactory/maven/'
+        }
     }
 }

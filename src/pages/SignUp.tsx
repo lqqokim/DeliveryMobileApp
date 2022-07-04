@@ -56,15 +56,15 @@ function SignUp({navigation}: SignUpScreenProps) {
     if (!password || !password.trim()) {
       return Alert.alert('알림', '비밀번호를 입력해주세요.');
     }
-    if (!emailRule.test(email)) {
-      return Alert.alert('알림', '올바른 이메일 주소가 아닙니다.');
-    }
-    if (!passwordRule.test(password)) {
-      return Alert.alert(
-        '알림',
-        '비밀번호는 영문,숫자,특수문자($@^!%*#?&)를 모두 포함하여 8자 이상 입력해야합니다.',
-      );
-    }
+    // if (!emailRule.test(email)) {
+    //   return Alert.alert('알림', '올바른 이메일 주소가 아닙니다.');
+    // }
+    // if (!passwordRule.test(password)) {
+    //   return Alert.alert(
+    //     '알림',
+    //     '비밀번호는 영문,숫자,특수문자($@^!%*#?&)를 모두 포함하여 8자 이상 입력해야합니다.',
+    //   );
+    // }
     console.log(email, name, password);
 
     try {
@@ -92,7 +92,13 @@ function SignUp({navigation}: SignUpScreenProps) {
     } finally {
       setTimeout(() => {
         setLoading(false);
-        Alert.alert('알림', '회원가입 완료되었습니다.');
+
+        Alert.alert('알림', '회원가입 완료되었습니다.', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('SignIn'),
+          },
+        ]);
       }, 1000);
     }
   }, [email, name, password]);

@@ -108,11 +108,14 @@ function AppInner() {
   // 앱 실행 시 토큰 있으면 로그인하는 코드
   useEffect(() => {
     const getTokenAndRefresh = async () => {
+      // await EncryptedStorage.removeItem('refreshToken');
       try {
         const token = await EncryptedStorage.getItem('refreshToken');
+        console.log('getTokenAndRefresh: ', token);
         if (!token) {
           return;
         }
+
         const response = await axios.post(
           `${Config.API_URL}/refreshToken`,
           {},
