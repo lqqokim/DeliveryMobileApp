@@ -22,6 +22,7 @@ import Config from 'react-native-config';
 import userSlice from './src/slices/user';
 import orderSlice, {Order} from './src/slices/order';
 import {Alert} from 'react-native';
+import usePermissions from './src/hooks/usePermissions';
 
 // 로그인 하지 않은 화면
 export type RootStackParamList = {
@@ -44,6 +45,8 @@ function AppInner() {
   const dispatch = useAppDispatch();
   const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
   const [socket, disconnect] = useSocket();
+
+  usePermissions();
 
   useEffect(() => {
     axios.interceptors.response.use(

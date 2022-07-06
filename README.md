@@ -220,7 +220,73 @@ npm install @react-navigation/bottom-tabs
 App.tsx
 
 ```typescript jsx
+import * as React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Settings from './src/pages/Settings';
+import Orders from './src/pages/Orders';
+import Delivery from './src/pages/Delivery';
+import {useState} from 'react';
+import SignIn from './src/pages/SignIn';
+import SignUp from './src/pages/SignUp';
 
+export type LoggedInParamList = {
+  Orders: undefined;
+  Settings: undefined;
+  Delivery: undefined;
+  Complete: {orderId: string};
+};
+
+export type RootStackParamList = {
+  SignIn: undefined;
+  SignUp: undefined;
+};
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function App() {
+  const [isLoggedIn, setLoggedIn] = useState(false);
+  return (
+    <NavigationContainer>
+      {isLoggedIn ? (
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Orders"
+            component={Orders}
+            options={{title: '오더 목록'}}
+          />
+          <Tab.Screen
+            name="Delivery"
+            component={Delivery}
+            options={{headerShown: false}}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={Settings}
+            options={{title: '내 정보'}}
+          />
+        </Tab.Navigator>
+      ) : (
+        <Stack.Navigator>
+          <Stack.Screen
+            name="SignIn"
+            component={SignIn}
+            options={{title: '로그인'}}
+          />
+          <Stack.Screen
+            name="SignUp"
+            component={SignUp}
+            options={{title: '회원가입'}}
+          />
+        </Stack.Navigator>
+      )}
+    </NavigationContainer>
+  );
+}
+
+export default App;
 ```
 
 - Tab.Navigator 도입
@@ -229,7 +295,27 @@ App.tsx
   src/pages/Delivery.tsx
 
 ```typescript jsx
+import React from 'react';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Complete from './Complete';
+import Ing from './Ing';
 
+const Stack = createNativeStackNavigator();
+
+function Delivery() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Ing" component={Ing} options={{title: '내 오더'}} />
+      <Stack.Screen
+        name="Complete"
+        component={Complete}
+        options={{title: '완료하기'}}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export default Delivery;
 ```
 
 - Navigator는 nesting 가능
@@ -285,14 +371,39 @@ npm i react-native-keyboard-aware-scrollview
 
 types/react-native-keyboard-aware-scroll-view
 
-```
-
+```typescript
+declare module 'react-native-keyboard-aware-scrollview' {
+  import * as React from 'react';
+  import {Constructor, ViewProps} from 'react-native';
+  class KeyboardAwareScrollViewComponent extends React.Component<ViewProps> {}
+  const KeyboardAwareScrollViewBase: KeyboardAwareScrollViewComponent &
+    Constructor<any>;
+  class KeyboardAwareScrollView extends KeyboardAwareScrollViewComponent {}
+  export {KeyboardAwareScrollView};
+}
 ```
 
 src/components/DismissKeyBoardView.tsx
 
 ```typescript jsx
+import React from 'react';
+import {
+  TouchableWithoutFeedback,
+  Keyboard,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scrollview';
 
+const DismissKeyboardView = ({children, ...props}) => (
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <KeyboardAwareScrollView {...props} style={props.style}>
+      {children}
+    </KeyboardAwareScrollView>
+  </TouchableWithoutFeedback>
+);
+
+export default DismissKeyboardView;
 ```
 
 ## 서버 요청 보내기(ch2)
@@ -409,8 +520,180 @@ const 값 = await EncryptedStorage.getItem('키');
 
 src/pages/SignUp.tsx, src/pages/SignIn.tsx
 
-```
+```typescript jsx
+import React, {useCallback, useRef, useState} from 'react';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  ActivityIndicator,
+} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import DismissKeyboardView from '../components/DismissKeyboardView';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
+import {RootStackParamList} from '../../AppInner';
+import {useAppDispatch} from '../store';
+import userSlice from '../slices/user';
 
+type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
+
+function SignIn({navigation}: SignInScreenProps) {
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const emailRef = useRef<TextInput | null>(null);
+  const passwordRef = useRef<TextInput | null>(null);
+
+  const onChangeEmail = useCallback(text => {
+    setEmail(text.trim());
+  }, []);
+  const onChangePassword = useCallback(text => {
+    setPassword(text.trim());
+  }, []);
+  const onSubmit = useCallback(async () => {
+    if (loading) {
+      return;
+    }
+    if (!email || !email.trim()) {
+      return Alert.alert('알림', '이메일을 입력해주세요.');
+    }
+    if (!password || !password.trim()) {
+      return Alert.alert('알림', '비밀번호를 입력해주세요.');
+    }
+    try {
+      setLoading(true);
+      const response = await axios.post(`${Config.API_URL}/login`, {
+        email,
+        password,
+      });
+      console.log(response.data);
+      Alert.alert('알림', '로그인 되었습니다.');
+      dispatch(
+        userSlice.actions.setUser({
+          name: response.data.data.name,
+          email: response.data.data.email,
+          accessToken: response.data.data.accessToken,
+        }),
+      );
+      await EncryptedStorage.setItem(
+        'refreshToken',
+        response.data.data.refreshToken,
+      );
+    } catch (error) {
+      const errorResponse = (error as AxiosError).response;
+      if (errorResponse) {
+        Alert.alert('알림', errorResponse.data.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, dispatch, email, password]);
+
+  const toSignUp = useCallback(() => {
+    navigation.navigate('SignUp');
+  }, [navigation]);
+
+  const canGoNext = email && password;
+  return (
+    <DismissKeyboardView>
+      <View style={styles.inputWrapper}>
+        <Text style={styles.label}>이메일</Text>
+        <TextInput
+          style={styles.textInput}
+          onChangeText={onChangeEmail}
+          placeholder="이메일을 입력해주세요"
+          placeholderTextColor="#666"
+          importantForAutofill="yes"
+          autoComplete="email"
+          textContentType="emailAddress"
+          value={email}
+          returnKeyType="next"
+          clearButtonMode="while-editing"
+          ref={emailRef}
+          onSubmitEditing={() => passwordRef.current?.focus()}
+          blurOnSubmit={false}
+        />
+      </View>
+      <View style={styles.inputWrapper}>
+        <Text style={styles.label}>비밀번호</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="비밀번호를 입력해주세요(영문,숫자,특수문자)"
+          placeholderTextColor="#666"
+          importantForAutofill="yes"
+          onChangeText={onChangePassword}
+          value={password}
+          autoComplete="password"
+          textContentType="password"
+          secureTextEntry
+          returnKeyType="send"
+          clearButtonMode="while-editing"
+          ref={passwordRef}
+          onSubmitEditing={onSubmit}
+        />
+      </View>
+      <View style={styles.buttonZone}>
+        <Pressable
+          style={
+            canGoNext
+              ? StyleSheet.compose(styles.loginButton, styles.loginButtonActive)
+              : styles.loginButton
+          }
+          disabled={!canGoNext || loading}
+          onPress={onSubmit}>
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.loginButtonText}>로그인</Text>
+          )}
+        </Pressable>
+        <Pressable onPress={toSignUp}>
+          <Text>회원가입하기</Text>
+        </Pressable>
+      </View>
+    </DismissKeyboardView>
+  );
+}
+
+const styles = StyleSheet.create({
+  textInput: {
+    padding: 5,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  inputWrapper: {
+    padding: 20,
+  },
+  label: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  buttonZone: {
+    alignItems: 'center',
+  },
+  loginButton: {
+    backgroundColor: 'gray',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  loginButtonActive: {
+    backgroundColor: 'blue',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});
+
+export default SignIn;
 ```
 
 android에서 http 요청이 안 보내지면
@@ -490,8 +773,84 @@ useEffect(() => {
 
 src/pages/Settings.tsx
 
-```
+```typescript jsx
+import React, {useCallback} from 'react';
+import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
+import {useAppDispatch} from '../store';
+import userSlice from '../slices/user';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/reducer';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
+function Settings() {
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
+  const dispatch = useAppDispatch();
+  const onLogout = useCallback(async () => {
+    try {
+      await axios.post(
+        `${Config.API_URL}/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      Alert.alert('알림', '로그아웃 되었습니다.');
+      dispatch(
+        userSlice.actions.setUser({
+          name: '',
+          email: '',
+          accessToken: '',
+        }),
+      );
+      await EncryptedStorage.removeItem('refreshToken');
+    } catch (error) {
+      const errorResponse = (error as AxiosError).response;
+      console.error(errorResponse);
+    }
+  }, [accessToken, dispatch]);
+
+  return (
+    <View>
+      <View style={styles.buttonZone}>
+        <Pressable
+          style={StyleSheet.compose(
+            styles.loginButton,
+            styles.loginButtonActive,
+          )}
+          onPress={onLogout}>
+          <Text style={styles.loginButtonText}>로그아웃</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  buttonZone: {
+    alignItems: 'center',
+    paddingTop: 20,
+  },
+  loginButton: {
+    backgroundColor: 'gray',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  loginButtonActive: {
+    backgroundColor: 'blue',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});
+
+export default Settings;
 ```
 
 ## 실제 주문 받기[ch3]
@@ -567,15 +926,174 @@ useEffect(() => {
 src/slices/order.ts
 
 ```typescript
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
+export interface Order {
+  orderId: string;
+  start: {
+    latitude: number;
+    longitude: number;
+  };
+  end: {
+    latitude: number;
+    longitude: number;
+  };
+  price: number;
+}
+interface InitialState {
+  orders: Order[];
+  deliveries: Order[];
+}
+const initialState: InitialState = {
+  orders: [],
+  deliveries: [],
+};
+const orderSlice = createSlice({
+  name: 'order',
+  initialState,
+  reducers: {
+    addOrder(state, action: PayloadAction<Order>) {
+      state.orders.push(action.payload);
+    },
+    acceptOrder(state, action: PayloadAction<string>) {
+      const index = state.orders.findIndex(v => v.orderId === action.payload);
+      if (index > -1) {
+        state.deliveries.push(state.orders[index]);
+        state.orders.splice(index, 1);
+      }
+    },
+    rejectOrder(state, action: PayloadAction<string>) {
+      const index = state.orders.findIndex(v => v.orderId === action.payload);
+      if (index > -1) {
+        state.orders.splice(index, 1);
+      }
+      const delivery = state.deliveries.findIndex(
+        v => v.orderId === action.payload,
+      );
+      if (delivery > -1) {
+        state.deliveries.splice(delivery, 1);
+      }
+    },
+  },
+  extraReducers: builder => {},
+});
+
+export default orderSlice;
 ```
 
 ## 수익금 확인하기
 
 src/pages/Settings.tsx
 
-```
+```typescript jsx
+import React, {useCallback, useEffect} from 'react';
+import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
+import {useAppDispatch} from '../store';
+import userSlice from '../slices/user';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/reducer';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
+function Settings() {
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
+  const money = useSelector((state: RootState) => state.user.money);
+  const name = useSelector((state: RootState) => state.user.name);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    async function getMoney() {
+      const response = await axios.get<{data: number}>(
+        `${Config.API_URL}/showmethemoney`,
+        {
+          headers: {authorization: `Bearer ${accessToken}`},
+        },
+      );
+      dispatch(userSlice.actions.setMoney(response.data.data));
+    }
+    getMoney();
+  }, [accessToken, dispatch]);
+
+  const onLogout = useCallback(async () => {
+    try {
+      await axios.post(
+        `${Config.API_URL}/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      Alert.alert('알림', '로그아웃 되었습니다.');
+      dispatch(
+        userSlice.actions.setUser({
+          name: '',
+          email: '',
+          accessToken: '',
+        }),
+      );
+      await EncryptedStorage.removeItem('refreshToken');
+    } catch (error) {
+      const errorResponse = (error as AxiosError).response;
+      console.error(errorResponse);
+    }
+  }, [accessToken, dispatch]);
+
+  return (
+    <View>
+      <View style={styles.money}>
+        <Text style={styles.moneyText}>
+          {name}님의 수익금{' '}
+          <Text style={{fontWeight: 'bold'}}>
+            {money.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+          </Text>
+          원
+        </Text>
+      </View>
+      <View style={styles.buttonZone}>
+        <Pressable
+          style={StyleSheet.compose(
+            styles.loginButton,
+            styles.loginButtonActive,
+          )}
+          onPress={onLogout}>
+          <Text style={styles.loginButtonText}>로그아웃</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  money: {
+    padding: 20,
+  },
+  moneyText: {
+    fontSize: 16,
+  },
+  buttonZone: {
+    alignItems: 'center',
+    paddingTop: 20,
+  },
+  loginButton: {
+    backgroundColor: 'gray',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  loginButtonActive: {
+    backgroundColor: 'blue',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+});
+
+export default Settings;
 ```
 
 ## 주문 화면 만들기(수락/거절)
@@ -583,7 +1101,31 @@ src/pages/Settings.tsx
 src/pages/Orders.tsx
 
 ```typescript jsx
+import React, {useCallback} from 'react';
+import {FlatList, View} from 'react-native';
+import {Order} from '../slices/order';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/reducer';
+import EachOrder from '../components/EachOrder';
 
+function Orders() {
+  const orders = useSelector((state: RootState) => state.order.orders);
+  const renderItem = useCallback(({item}: {item: Order}) => {
+    return <EachOrder item={item} />;
+  }, []);
+
+  return (
+    <View>
+      <FlatList
+        data={orders}
+        keyExtractor={item => item.orderId}
+        renderItem={renderItem}
+      />
+    </View>
+  );
+}
+
+export default Orders;
 ```
 
 - ScrollView + map 조합은 좋지 않음
@@ -843,16 +1385,323 @@ npm i @react-native-community/geolocation
 
 src/pages/Ing.tsx
 
-```
+```typescript jsx
+import React, {useEffect, useState} from 'react';
+import {Dimensions, Text, View} from 'react-native';
+import NaverMapView, {Marker, Path} from 'react-native-nmap';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/reducer';
+import Geolocation from '@react-native-community/geolocation';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {LoggedInParamList} from '../../AppInner';
 
+type IngScreenProps = NativeStackScreenProps<LoggedInParamList, 'Delivery'>;
+
+function Ing({navigation}: IngScreenProps) {
+  console.dir(navigation);
+  const deliveries = useSelector((state: RootState) => state.order.deliveries);
+  const [myPosition, setMyPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    Geolocation.getCurrentPosition(
+      info => {
+        setMyPosition({
+          latitude: info.coords.latitude,
+          longitude: info.coords.longitude,
+        });
+      },
+      console.error,
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+      },
+    );
+  }, []);
+
+  if (!deliveries?.[0]) {
+    return (
+      <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+        <Text>주문을 먼저 수락해주세요!</Text>
+      </View>
+    );
+  }
+
+  if (!myPosition || !myPosition.latitude) {
+    return (
+      <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+        <Text>내 위치를 로딩 중입니다. 권한을 허용했는지 확인해주세요.</Text>
+      </View>
+    );
+  }
+
+  const {start, end} = deliveries?.[0];
+
+  return (
+    <View>
+      <View
+        style={{
+          width: Dimensions.get('window').width,
+          height: Dimensions.get('window').height,
+        }}>
+        <NaverMapView
+          style={{width: '100%', height: '100%'}}
+          zoomControl={false}
+          center={{
+            zoom: 10,
+            tilt: 50,
+            latitude: (start.latitude + end.latitude) / 2,
+            longitude: (start.longitude + end.longitude) / 2,
+          }}>
+          {myPosition?.latitude && (
+            <Marker
+              coordinate={{
+                latitude: myPosition.latitude,
+                longitude: myPosition.longitude,
+              }}
+              width={15}
+              height={15}
+              anchor={{x: 0.5, y: 0.5}}
+              caption={{text: '나'}}
+              image={require('../assets/red-dot.png')}
+            />
+          )}
+          {myPosition?.latitude && (
+            <Path
+              coordinates={[
+                {
+                  latitude: myPosition.latitude,
+                  longitude: myPosition.longitude,
+                },
+                {latitude: start.latitude, longitude: start.longitude},
+              ]}
+              color="orange"
+            />
+          )}
+          <Marker
+            coordinate={{
+              latitude: start.latitude,
+              longitude: start.longitude,
+            }}
+            width={15}
+            height={15}
+            anchor={{x: 0.5, y: 0.5}}
+            caption={{text: '출발'}}
+            image={require('../assets/blue-dot.png')}
+          />
+          <Path
+            coordinates={[
+              {
+                latitude: start.latitude,
+                longitude: start.longitude,
+              },
+              {latitude: end.latitude, longitude: end.longitude},
+            ]}
+            color="orange"
+          />
+          <Marker
+            coordinate={{latitude: end.latitude, longitude: end.longitude}}
+            width={15}
+            height={15}
+            anchor={{x: 0.5, y: 0.5}}
+            caption={{text: '도착'}}
+            image={require('../assets/green-dot.png')}
+            onClick={() => {
+              console.log(navigation);
+              navigation.push('Complete', {orderId: deliveries[0].orderId});
+            }}
+          />
+        </NaverMapView>
+      </View>
+    </View>
+  );
+}
+
+export default Ing;
 ```
 
 ## 이미지 선택하기(주문 완료)
 
 src/pages/Complete.tsx
 
-```
+```typescript jsx
+import React, {useCallback, useState} from 'react';
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import {LoggedInParamList} from '../../AppInner';
+import ImagePicker from 'react-native-image-crop-picker';
+import ImageResizer from 'react-native-image-resizer';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/reducer';
+import orderSlice from '../slices/order';
+import {useAppDispatch} from '../store';
 
+function Complete() {
+  const dispatch = useAppDispatch();
+  const route = useRoute<RouteProp<LoggedInParamList>>();
+  const navigation = useNavigation<NavigationProp<LoggedInParamList>>();
+  const [image, setImage] = useState<{
+    uri: string;
+    name: string;
+    type: string;
+  }>();
+  const [preview, setPreview] = useState<{uri: string}>();
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
+
+  const onResponse = useCallback(async response => {
+    console.log(response.width, response.height, response.exif);
+    setPreview({uri: `data:${response.mime};base64,${response.data}`});
+    const orientation = (response.exif as any)?.Orientation;
+    console.log('orientation', orientation);
+    return ImageResizer.createResizedImage(
+      response.path,
+      600,
+      600,
+      response.mime.includes('jpeg') ? 'JPEG' : 'PNG',
+      100,
+      0,
+    ).then(r => {
+      console.log(r.uri, r.name);
+
+      setImage({
+        uri: r.uri,
+        name: r.name,
+        type: response.mime,
+      });
+    });
+  }, []);
+
+  const onTakePhoto = useCallback(() => {
+    return ImagePicker.openCamera({
+      includeBase64: true,
+      includeExif: true,
+      saveToPhotos: true,
+    })
+      .then(onResponse)
+      .catch(console.log);
+  }, [onResponse]);
+
+  const onChangeFile = useCallback(() => {
+    return ImagePicker.openPicker({
+      includeExif: true,
+      includeBase64: true,
+      mediaType: 'photo',
+    })
+      .then(onResponse)
+      .catch(console.log);
+  }, [onResponse]);
+
+  const orderId = route.params?.orderId;
+  const onComplete = useCallback(async () => {
+    if (!image) {
+      Alert.alert('알림', '파일을 업로드해주세요.');
+      return;
+    }
+    if (!orderId) {
+      Alert.alert('알림', '유효하지 않은 주문입니다.');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('image', image);
+    formData.append('orderId', orderId);
+    try {
+      await axios.post(`${Config.API_URL}/complete`, formData, {
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
+      Alert.alert('알림', '완료처리 되었습니다.');
+      navigation.goBack();
+      navigation.navigate('Settings');
+      dispatch(orderSlice.actions.rejectOrder(orderId));
+    } catch (error) {
+      const errorResponse = (error as AxiosError).response;
+      if (errorResponse) {
+        Alert.alert('알림', errorResponse.data.message);
+      }
+    }
+  }, [dispatch, navigation, image, orderId, accessToken]);
+
+  return (
+    <View>
+      <View style={styles.orderId}>
+        <Text>주문번호: {orderId}</Text>
+      </View>
+      <View style={styles.preview}>
+        {preview && <Image style={styles.previewImage} source={preview} />}
+      </View>
+      <View style={styles.buttonWrapper}>
+        <Pressable style={styles.button} onPress={onTakePhoto}>
+          <Text style={styles.buttonText}>이미지 촬영</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={onChangeFile}>
+          <Text style={styles.buttonText}>이미지 선택</Text>
+        </Pressable>
+        <Pressable
+          style={
+            image
+              ? styles.button
+              : StyleSheet.compose(styles.button, styles.buttonDisabled)
+          }
+          onPress={onComplete}>
+          <Text style={styles.buttonText}>완료</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  orderId: {
+    padding: 20,
+  },
+  preview: {
+    marginHorizontal: 10,
+    width: Dimensions.get('window').width - 20,
+    height: Dimensions.get('window').height / 3,
+    backgroundColor: '#D2D2D2',
+    marginBottom: 10,
+  },
+  previewImage: {
+    height: Dimensions.get('window').height / 3,
+    resizeMode: 'contain',
+  },
+  buttonWrapper: {flexDirection: 'row', justifyContent: 'center'},
+  button: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    width: 120,
+    alignItems: 'center',
+    backgroundColor: 'yellow',
+    borderRadius: 5,
+    margin: 5,
+  },
+  buttonText: {
+    color: 'black',
+  },
+  buttonDisabled: {
+    backgroundColor: 'gray',
+  },
+});
+
+export default Complete;
 ```
 
 이미지 선택 후 리사이징

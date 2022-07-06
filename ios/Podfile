@@ -7,6 +7,15 @@ install! 'cocoapods', :deterministic_uuids => false
 target 'DeliveryMobileApp' do
   config = use_native_modules!
 
+  # 위치정보 관련 권한 얻기 (위치정보, 카메라, 갤러리)
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
+  pod 'Permission-LocationAccuracy', :path => "#{permissions_path}/LocationAccuracy"
+  pod 'Permission-LocationAlways', :path => "#{permissions_path}/LocationAlways"
+  pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
+  pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
+  pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
+
   pod 'React', :path => '../node_modules/react-native/'
   # pod 'React-Core', :path => '../node_modules/react-native/React'
   pod 'React-Core', :path => '../node_modules/react-native/'
@@ -83,6 +92,9 @@ target 'DeliveryMobileApp' do
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable the next line.
   use_flipper!()
+
+  # pod 'NMapsMap', '3.10.1'
+  pod 'NMapsMap'
 
   post_install do |installer|
     react_native_post_install(installer)
