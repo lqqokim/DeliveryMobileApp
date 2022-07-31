@@ -23,6 +23,7 @@ import {useSelector} from 'react-redux';
 import {RootState} from '../store/reducer';
 import orderSlice from '../slices/order';
 import {useAppDispatch} from '../store';
+import {API_URL} from '../config/index';
 
 function Complete() {
   const dispatch = useAppDispatch();
@@ -104,7 +105,7 @@ function Complete() {
     formData.append('orderId', orderId);
 
     try {
-      await axios.post(`${Config.API_URL}/complete`, formData, {
+      await axios.post(`${API_URL}/complete`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data', // 추가 필요
           authorization: `Bearer ${accessToken}`,

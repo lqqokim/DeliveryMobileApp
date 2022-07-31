@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect} from 'react';
 import {Alert, Pressable, StyleSheet, Text, View} from 'react-native';
 import axios, {AxiosError} from 'axios';
-import Config from 'react-native-config';
+import {API_URL} from '../config/index';
 import {useAppDispatch} from '../store';
 import userSlice from '../slices/user';
 import {useSelector} from 'react-redux';
@@ -17,7 +17,7 @@ function Settings() {
   useEffect(() => {
     async function getMoney() {
       const response = await axios.get<{data: number}>(
-        `${Config.API_URL}/showmethemoney`,
+        `${API_URL}/showmethemoney`,
         {
           headers: {authorization: `Bearer ${accessToken}`},
         },
@@ -31,7 +31,7 @@ function Settings() {
   const onLogout = useCallback(async () => {
     try {
       await axios.post(
-        `${Config.API_URL}/logout`,
+        `${API_URL}/logout`,
         {},
         {
           headers: {

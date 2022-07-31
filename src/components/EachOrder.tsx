@@ -13,7 +13,7 @@ import {useAppDispatch} from '../store';
 import axios, {AxiosError, AxiosResponse} from 'axios';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store/reducer';
-import Config from 'react-native-config';
+import {API_URL} from '../config/index';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {LoggedInParamList} from '../../AppInner';
 import NaverMapView, {Marker, Path} from 'react-native-nmap';
@@ -35,7 +35,7 @@ function EachOrder({item}: Props) {
     }
     try {
       await axios.post(
-        `${Config.API_URL}/accept`,
+        `${API_URL}/accept`,
         {orderId: item.orderId},
         {headers: {authorization: `Bearer ${accessToken}`}},
       );

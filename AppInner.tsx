@@ -18,7 +18,7 @@ import useSocket from './src/hooks/useSocket';
 import {useAppDispatch} from './src/store';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import axios, {AxiosError, AxiosResponse} from 'axios';
-import Config from 'react-native-config';
+import {API_URL} from './src/config/index';
 import userSlice from './src/slices/user';
 import orderSlice, {Order} from './src/slices/order';
 import {Alert} from 'react-native';
@@ -65,7 +65,7 @@ function AppInner() {
             const refreshToken = await EncryptedStorage.getItem('refreshToken');
             // token refresh 요청
             const {data} = await axios.post(
-              `${Config.API_URL}/refreshToken`, // token refresh api
+              `${API_URL}/refreshToken`, // token refresh api
               {},
               {headers: {authorization: `Bearer ${refreshToken}`}},
             );
@@ -120,7 +120,7 @@ function AppInner() {
         }
 
         const response = await axios.post(
-          `${Config.API_URL}/refreshToken`,
+          `${API_URL}/refreshToken`,
           {},
           {
             headers: {

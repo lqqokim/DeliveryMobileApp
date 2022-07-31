@@ -1,6 +1,6 @@
 import {useCallback} from 'react';
 import {io, Socket} from 'socket.io-client';
-import Config from 'react-native-config';
+import {API_URL} from '../config/index';
 
 let socket: Socket | undefined;
 const useSocket = (): [Socket | undefined, () => void] => {
@@ -11,7 +11,7 @@ const useSocket = (): [Socket | undefined, () => void] => {
     }
   }, []);
   if (!socket) {
-    socket = io(Config.API_URL, {
+    socket = io(API_URL, {
       // transports: ['long-polling', 'websocket'],
       transports: ['websocket'],
       path: '/socket.io',
