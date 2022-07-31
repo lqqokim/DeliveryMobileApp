@@ -1,13 +1,15 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '11.0'
+
+
+platform :ios, '12.1'
 install! 'cocoapods', :deterministic_uuids => false
 
 target 'DeliveryMobileApp' do
+
   config = use_native_modules!
 
-  # 위치정보 관련 권한 얻기 (위치정보, 카메라, 갤러리)
   permissions_path = '../node_modules/react-native-permissions/ios'
   pod 'Permission-Camera', :path => "#{permissions_path}/Camera"
   pod 'Permission-LocationAccuracy', :path => "#{permissions_path}/LocationAccuracy"
@@ -15,60 +17,6 @@ target 'DeliveryMobileApp' do
   pod 'Permission-LocationWhenInUse', :path => "#{permissions_path}/LocationWhenInUse"
   pod 'Permission-Notifications', :path => "#{permissions_path}/Notifications"
   pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
-
-  pod 'React', :path => '../node_modules/react-native/'
-  # pod 'React-Core', :path => '../node_modules/react-native/React'
-  pod 'React-Core', :path => '../node_modules/react-native/'
-  pod 'React-DevSupport', :path => '../node_modules/react-native/React'
-  pod 'React-fishhook', :path => '../node_modules/react-native/Libraries/fishhook'
-  pod 'React-RCTActionSheet', :path => '../node_modules/react-native/Libraries/ActionSheetIOS'
-  pod 'React-RCTAnimation', :path => '../node_modules/react-native/Libraries/NativeAnimation'
-  pod 'React-RCTBlob', :path => '../node_modules/react-native/Libraries/Blob'
-  pod 'React-RCTImage', :path => '../node_modules/react-native/Libraries/Image'
-  pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
-  pod 'React-RCTNetwork', :path => '../node_modules/react-native/Libraries/Network'
-  pod 'React-RCTSettings', :path => '../node_modules/react-native/Libraries/Settings'
-  pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
-  pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
-  pod 'React-RCTWebSocket', :path => '../node_modules/react-native/Libraries/WebSocket'
-  pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
-  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'
-  pod 'React-jsiexecutor', :path => '../node_modules/react-native/ReactCommon/jsiexecutor'
-  pod 'React-jsinspector', :path => '../node_modules/react-native/ReactCommon/jsinspector'
-  pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
-  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
-  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-
-  # pod 'React', :path => '../node_modules/react-native/'
-  # pod 'React-Core', :path => '../node_modules/react-native/'
-  # # # pod 'React-Core', :path => '../node_modules/react-native/React'
-  # pod 'React-DevSupport', :path => '../node_modules/react-native/React'
-  # pod 'React-fishhook', :path => '../node_modules/react-native/Libraries/fishhook'
-  # pod 'React-RCTActionSheet', :path => '../node_modules/react-native/Libraries/ActionSheetIOS'
-  # pod 'React-RCTAnimation', :path => '../node_modules/react-native/Libraries/NativeAnimation'
-  # pod 'React-RCTBlob', :path => '../node_modules/react-native/Libraries/Blob'
-  # pod 'React-RCTImage', :path => '../node_modules/react-native/Libraries/Image'
-  # pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
-  # pod 'React-RCTNetwork', :path => '../node_modules/react-native/Libraries/Network'
-  # pod 'React-RCTSettings', :path => '../node_modules/react-native/Libraries/Settings'
-  # pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
-  # pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
-  # pod 'React-RCTWebSocket', :path => '../node_modules/react-native/Libraries/WebSocket'
-  # pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
-  # pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'
-  # pod 'React-jsiexecutor', :path => '../node_modules/react-native/ReactCommon/jsiexecutor'
-  # pod 'React-jsinspector', :path => '../node_modules/react-native/ReactCommon/jsinspector'
-  # pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
-  # pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
-  # pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
-  # pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
-  # pod 'React-CoreModules', :path => '../node_modules/react-native/React/CoreModules'
-
-  # # pod 'RCTTypeSafety', :path => '../node_modules/react-native/Libraries/TypeSafety'
-  # # pod 'RCTRequired', :path => '../node_modules/react-native/Libraries/RCTRequired'
-  # # pod 'FBReactNativeSpec', :path => '../node_modules/react-native/React/FBReactNativeSpec'
-  # # pod 'FBLazyVector', :path => '../node_modules/react-native/Libraries/FBLazyVector'
 
   # Flags change depending on the env values.
   flags = get_default_flags()
@@ -86,18 +34,15 @@ target 'DeliveryMobileApp' do
     inherit! :complete
     # Pods for testing
   end
-
   # Enables Flipper.
   #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable the next line.
-  use_flipper!()
-
-  # pod 'NMapsMap', '3.10.1'
+  use_flipper!
   pod 'NMapsMap'
-
   post_install do |installer|
-    react_native_post_install(installer)
+    flipper_post_install(installer)
+#     react_native_post_install(installer)
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
 end
