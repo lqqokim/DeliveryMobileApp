@@ -19,7 +19,7 @@
       android:theme="@style/AppTheme">
       <meta-data
         android:name="com.naver.maps.map.CLIENT_ID"
-        android:value="08bpiwxvn0" />
+        android:value="y1u0nd3kf6" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

@@ -33,6 +33,7 @@ function EachOrder({item}: Props) {
     if (!accessToken) {
       return;
     }
+
     try {
       await axios.post(
         `${API_URL}/accept`,

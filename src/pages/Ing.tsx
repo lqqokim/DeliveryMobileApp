@@ -13,15 +13,12 @@ type IngScreenProps = NativeStackScreenProps<LoggedInParamList, 'Delivery'>;
 function Ing({navigation}: IngScreenProps) {
   // console.dir(navigation);
   const deliveries = useSelector((state: RootState) => state.order.deliveries);
-  console.log('Ing_________________________', deliveries);
-
   const [myPosition, setMyPosition] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
 
   useEffect(() => {
-    console.log('in');
     Geolocation.getCurrentPosition(
       info => {
         console.log('[Geolocation] ', info);
@@ -36,10 +33,6 @@ function Ing({navigation}: IngScreenProps) {
         timeout: 20000,
       },
     );
-
-    return () => {
-      console.log('unmounted');
-    };
   }, [deliveries, Geolocation]);
 
   if (!deliveries?.[0]) {

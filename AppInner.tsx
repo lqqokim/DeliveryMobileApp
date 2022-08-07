@@ -30,7 +30,6 @@ export type RootStackParamList = {
   SignUp: undefined;
 };
 
-//
 export type LoggedInParamList = {
   Orders: undefined;
   Settings: undefined;
@@ -59,10 +58,11 @@ function AppInner() {
           response: {status},
         } = error;
         if (status === 419) {
-          console.log('interceptor config: ', config);
+          // console.log('interceptor config: ', config);
           if (error.response.data.code === 'expired') {
             const originalRequest = config;
             const refreshToken = await EncryptedStorage.getItem('refreshToken');
+            console.log('refreshToken ', refreshToken);
             // token refresh 요청
             const {data} = await axios.post(
               `${API_URL}/refreshToken`, // token refresh api
@@ -103,7 +103,6 @@ function AppInner() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      console.log('!isLoggedIn', !isLoggedIn);
       disconnect();
     }
   }, [isLoggedIn, disconnect]);
@@ -114,7 +113,7 @@ function AppInner() {
       // await EncryptedStorage.removeItem('refreshToken');
       try {
         const token = await EncryptedStorage.getItem('refreshToken');
-        console.log('getTokenAndRefresh: ', token);
+        // console.log('getTokenAndRefresh: ', token);
         if (!token) {
           return;
         }
@@ -128,6 +127,7 @@ function AppInner() {
             },
           },
         );
+
         dispatch(
           userSlice.actions.setUser({
             name: response.data.data.name,
@@ -138,7 +138,7 @@ function AppInner() {
       } catch (error) {
         const errorResponse = (error as AxiosError).response as AxiosResponse;
         console.error(errorResponse);
-        if (errorResponse.data.code === 'expired') {
+        if (errorResponse?.data.code === 'expired') {
           Alert.alert('알림', '다시 로그인 해주세요.');
         }
       } finally {

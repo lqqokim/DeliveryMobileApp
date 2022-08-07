@@ -40,12 +40,15 @@ function SignIn({navigation}: SignInScreenProps) {
     if (loading) {
       return;
     }
+
     if (!email || !email.trim()) {
       return Alert.alert('알림', '이메일을 입력해주세요.');
     }
+
     if (!password || !password.trim()) {
       return Alert.alert('알림', '비밀번호를 입력해주세요.');
     }
+
     try {
       setLoading(true);
 
