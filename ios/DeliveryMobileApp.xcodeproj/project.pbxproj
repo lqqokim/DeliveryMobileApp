@@ -13,6 +13,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		CC498B0639A6DD594FDFF7BF /* libPods-DeliveryMobileApp-DeliveryMobileAppTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F03924174693A4AF42285FA6 /* libPods-DeliveryMobileApp-DeliveryMobileAppTests.a */; };
+		CE7466AE289F8A1900E3AA7C /* RTCTMap.m in Sources */ = {isa = PBXBuildFile; fileRef = CE7466AD289F8A1900E3AA7C /* RTCTMap.m */; };
 		DDFDCE8E07643E9AE55A9E79 /* libPods-DeliveryMobileApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D9AE008555E0FF497006792D /* libPods-DeliveryMobileApp.a */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,10 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = DeliveryMobileApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9A05D37C6EB636A358E73CEF /* Pods-DeliveryMobileApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DeliveryMobileApp.release.xcconfig"; path = "Target Support Files/Pods-DeliveryMobileApp/Pods-DeliveryMobileApp.release.xcconfig"; sourceTree = "<group>"; };
 		CC6307D93E4F1E9D09A657B9 /* Pods-DeliveryMobileApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DeliveryMobileApp.debug.xcconfig"; path = "Target Support Files/Pods-DeliveryMobileApp/Pods-DeliveryMobileApp.debug.xcconfig"; sourceTree = "<group>"; };
+		CE7466AC289F89AA00E3AA7C /* RCTTMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTTMap.h; sourceTree = "<group>"; };
+		CE7466AD289F8A1900E3AA7C /* RTCTMap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RTCTMap.m; sourceTree = "<group>"; };
+		CE7466B1289F961400E3AA7C /* DeliveryMobileApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DeliveryMobileApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		CE7466B2289F96AC00E3AA7C /* DeliveryMobileApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DeliveryMobileApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		D9AE008555E0FF497006792D /* libPods-DeliveryMobileApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DeliveryMobileApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F03924174693A4AF42285FA6 /* libPods-DeliveryMobileApp-DeliveryMobileAppTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DeliveryMobileApp-DeliveryMobileAppTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,6 +97,9 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				CE7466AC289F89AA00E3AA7C /* RCTTMap.h */,
+				CE7466AD289F8A1900E3AA7C /* RTCTMap.m */,
+				CE7466B2289F96AC00E3AA7C /* DeliveryMobileApp-Bridging-Header.h */,
 			);
 			name = DeliveryMobileApp;
 			sourceTree = "<group>";
@@ -116,6 +124,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				CE7466B1289F961400E3AA7C /* DeliveryMobileApp-Bridging-Header.h */,
 				13B07FAE1A68108700A75B9A /* DeliveryMobileApp */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* DeliveryMobileAppTests */,
@@ -413,6 +422,7 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				CE7466AE289F8A1900E3AA7C /* RTCTMap.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

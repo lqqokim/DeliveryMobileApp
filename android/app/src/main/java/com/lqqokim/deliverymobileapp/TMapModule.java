@@ -28,7 +28,6 @@ public class TMapModule extends ReactContextBaseJavaModule {
             @Override
             public void SKTMapApikeySucceed() {
                 boolean isTmapApp = tMapTapi.isTmapApplicationInstalled();
-                Log.i("TMap", isTmapApp ? "설치됨" : "미설치");
                 if (isTmapApp) {
                     HashMap pathInfo = new HashMap();
                     pathInfo.put("rGoName", name);
@@ -49,11 +48,10 @@ public class TMapModule extends ReactContextBaseJavaModule {
 
             @Override
             public void SKTMapApikeyFailed(String errorMsg) {
-                Log.e("TMap", errorMsg);
                 promise.resolve(false);
             }
         });
-        tMapTapi.setSKTMapAuthentication("l7xx23d57d02cdef4970ad53c247b91f85c0");
+        tMapTapi.setSKTMapAuthentication("l7xxc797611346154cf998beea3e1c896753");
         boolean isTmapApp = tMapTapi.isTmapApplicationInstalled();
         if (isTmapApp) {
             boolean result = tMapTapi.invokeNavigate(name, Float.parseFloat(longitude), Float.parseFloat(latitude), 0, false, vehicle.equals("MOTORCYCLE") ? 6 : 0);

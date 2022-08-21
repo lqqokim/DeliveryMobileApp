@@ -110,7 +110,7 @@ function AppInner() {
   // 앱 실행 시 토큰 있으면 로그인하는 코드
   useEffect(() => {
     const getTokenAndRefresh = async () => {
-      // await EncryptedStorage.removeItem('refreshToken');
+      await EncryptedStorage.removeItem('refreshToken');
       try {
         const token = await EncryptedStorage.getItem('refreshToken');
         // console.log('getTokenAndRefresh: ', token);
@@ -160,7 +160,7 @@ function AppInner() {
           <Tab.Screen
             name="Delivery"
             component={Delivery}
-            options={{headerShown: false}}
+            options={{headerShown: false, unmountOnBlur: true}}
           />
           <Tab.Screen
             name="Settings"
