@@ -3,12 +3,15 @@ package com.lqqokim.deliverymobileapp;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
+import org.devio.rn.splashscreen.SplashScreen; // here
+// import com.cboy.rn.splashscreen.SplashScreen; // here
 import android.os.Bundle;
 
 public class MainActivity extends ReactActivity {
   // 추가 React Navigation
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    SplashScreen.show(this);  // here
     super.onCreate(null);
   }
 

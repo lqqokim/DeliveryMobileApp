@@ -23,6 +23,7 @@ import userSlice from './src/slices/user';
 import orderSlice, {Order} from './src/slices/order';
 import {Alert} from 'react-native';
 import usePermissions from './src/hooks/usePermissions';
+import SplashScreen from 'react-native-splash-screen';
 
 // 로그인 하지 않은 화면
 export type RootStackParamList = {
@@ -115,6 +116,7 @@ function AppInner() {
         const token = await EncryptedStorage.getItem('refreshToken');
         // console.log('getTokenAndRefresh: ', token);
         if (!token) {
+          SplashScreen.hide();
           return;
         }
 
@@ -143,6 +145,7 @@ function AppInner() {
         }
       } finally {
         // TODO: 스플래시 스크린 없애기
+        SplashScreen.hide();
       }
     };
     getTokenAndRefresh();
